@@ -1,7 +1,36 @@
-from clean_imports.imports import get_imports
+from pathlib import Path
+
+from clean_imports.fixed_walker import FixedWalker
+from clean_imports.imports import Import, get_imports
 
 
-def test_ast():
-    imports = list(get_imports(__file__))
+def test_import(tmpfile: Path) -> None:
+    walker = FixedWalker(tmpfile, "import pathlib")
 
-    assert imports == ["clean_imports.imports.get_imports"]
+    imports = list(get_imports(walker))
+
+    assert imports == [
+        Import(
+            tmpfile,
+            1,
+            7,
+            "import pathlib",
+            "pathlib",
+        ),
+    ]
+
+
+def test_from_import(tmpfile: Path) -> None:
+    walker = FixedWalker(tmpfile, "from pathlib import Path")
+
+    imports = list(get_imports(walker))
+
+    assert imports == [
+        Import(
+            tmpfile,
+            1,
+            20,
+            "from pathlib import Path",
+            "pathlib.Path",
+        )
+    ]
